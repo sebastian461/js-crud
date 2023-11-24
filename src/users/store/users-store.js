@@ -24,8 +24,24 @@ const loadPreviousPage = async () => {
   state.users = users;
 };
 
-const onUserChanged = () => {
-  throw new Error("Not implemented");
+/**
+ *
+ * @param {User} user
+ */
+const onUserChanged = (user) => {
+  let wasFound = false;
+
+  state.users = state.users.map((u) => {
+    if (u.id === user.id) {
+      wasFound = true;
+      return user;
+    }
+    return u;
+  });
+
+  if (state.users.length < 10 && !wasFound) {
+    state.users.push(user);
+  }
 };
 
 const reloadPage = async () => {

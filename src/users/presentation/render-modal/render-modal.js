@@ -1,10 +1,35 @@
 import modalHtml from "./render-modal.html?raw";
 import "./render-modal.css";
-import { saveUser } from "../../use-cases/save-user";
-let modal, form;
+import { getUserById } from "../../use-cases/get-user";
+import { User } from "../../models/user";
+let modal,
+  form,
+  loadedUser = {};
 
-export const showModal = () => {
+/**
+ *
+ * @param {String|Number} id
+ */
+export const showModal = async (id) => {
   modal?.classList.remove("hide-modal");
+  loadedUser = {};
+
+  if (!id) return;
+  const user = await getUserById(id);
+  setFormValues(user);
+};
+
+/**
+ *
+ * @param {User} user
+ */
+const setFormValues = (user) => {
+  form.querySelector("[name='firstName']").value = user.firstName;
+  form.querySelector("[name='lastName']").value = user.lastName;
+  form.querySelector("[name='balance']").value = user.balance;
+  form.querySelector("[name='isActive']").checked = user.isActive;
+
+  loadedUser = user;
 };
 
 export const hideModal = () => {
@@ -33,7 +58,12 @@ export const renderModal = (element, saveUserCallback) => {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
-    const userLike = {};
+    const userLike = { ...loadedUser };
+
+    if (!formData.get("isActive")) {
+      formData.append("isActive", "off");
+    }
+
     for (const [key, value] of formData) {
       if (key === "balance") {
         userLike[key] = +value;
